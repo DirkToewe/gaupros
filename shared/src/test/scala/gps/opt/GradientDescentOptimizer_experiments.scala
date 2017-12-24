@@ -15,8 +15,7 @@ object GradientDescentOptimizer_experiments
       GradientDescentOptimizer
 //        .withExponentialDecayHybrid(1e-3,1e-3, 1e-2,1e-4, 2 * 1024)
         .withExponentialDecayAbs(4,1e-4, 1024)
-        .minimize( obj, x0 )
-//        .minimize( obj, x0, x_min = Vec(-2, -2), x_max = Vec(0, +2) )
+        .minimize( obj, x0, x_min = Vec(-2, -2), x_max = Vec(0, +2) )
     }
     finally {
       println()
