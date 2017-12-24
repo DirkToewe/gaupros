@@ -1,5 +1,6 @@
 package gps.opt
 
+import gps.linalg.Vec
 import gps.opt.test_functions.RosenbrockFunction
 
 /**

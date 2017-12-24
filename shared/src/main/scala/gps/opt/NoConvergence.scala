@@ -1,5 +1,7 @@
 package gps.opt
 
+import gps.linalg.Vec
+
 /** Exception thrown by iterative optimizers and solvers if the maximum number of iterations
   * is exceeded without achieving the demanded tolerance in the solution.
   *

@@ -1,5 +1,7 @@
 package gps.opt
 
+import gps.linalg.Vec
+
 import scala.Double.{PositiveInfinity => ∞}
 import scala.annotation.tailrec
 

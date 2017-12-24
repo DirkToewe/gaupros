@@ -1,6 +1,7 @@
 package gps.regression
 
 import gps.kernel._
+import gps.linalg.Vec
 import gps.opt.{BFGS_B_Optimizer, ObjectiveWithLogger}
 import gps.util.PlotlyUtil
 

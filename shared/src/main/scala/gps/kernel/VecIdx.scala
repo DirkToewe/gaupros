@@ -1,5 +1,7 @@
 package gps.kernel
 
+import gps.linalg.Vec
+
 /** A Kernel[Vec] that applies a Kernel[Double] on a specific index entry of a the argument Vecs.
   *
   * Created by Dirk Toewe on 10.08.17.

@@ -1,6 +1,7 @@
 package gps.opt
 
 import gps.diff
+import gps.linalg.Vec
 
 /**
   * Created by Dirk Toewe on 09.08.17.

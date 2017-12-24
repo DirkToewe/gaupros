@@ -1,5 +1,7 @@
 package gps
 
+import gps.linalg.Vec
+
 /** Rudimentary optimization methods and utilities.
   *
   * Created by Dirk Toewe on 20.06.17.

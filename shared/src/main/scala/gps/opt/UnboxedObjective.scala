@@ -1,6 +1,6 @@
 package gps.opt
 
-import gps.linalg.LMat
+import gps.linalg.{ LMat, Vec }
 
 import scala.math.{acos, cos, sin, sqrt => √}
 

@@ -1,6 +1,7 @@
 package gps.regression.gpr
 
 import gps.kernel.Kernel
+import gps.linalg.Vec
 import gps.opt.ObjectiveWithHessian
 
 import scala.collection.{IndexedSeq => ISeq}

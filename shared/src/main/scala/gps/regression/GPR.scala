@@ -1,7 +1,7 @@
 package gps.regression
 
 import gps.kernel.Kernel
-import gps.linalg.LMat
+import gps.linalg.{ LMat, Vec }
 import gps.opt.BFGS_B_Optimizer
 import gps.regression.gpr.{LogP_LOO, LogP_Marginal}
 

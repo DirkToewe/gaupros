@@ -1,5 +1,7 @@
 package gps.opt
 
+import gps.linalg.Vec
+
 /**
   * Created by Dirk Toewe on 29.08.17.
   */

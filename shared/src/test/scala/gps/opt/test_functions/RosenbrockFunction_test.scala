@@ -1,5 +1,6 @@
 package gps.opt.test_functions
 
+import gps.linalg.Vec
 import gps.opt.ObjectiveWithHessian_test
 
 /**

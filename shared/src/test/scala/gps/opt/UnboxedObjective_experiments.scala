@@ -1,9 +1,9 @@
 package gps.opt
 
+import gps.linalg.Vec
 import gps.opt.test_functions.RosenbrockFunction
 import gps.util.PlotlyUtil
 
-import scala.Double.{PositiveInfinity => ∞}
 import scala.math.{Pi => π}
 
 /**

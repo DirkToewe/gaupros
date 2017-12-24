@@ -1,9 +1,8 @@
 package gps.opt
 
+import gps.linalg.Vec
 import gps.opt.test_functions.RosenbrockFunction
 import gps.util.PlotlyUtil
-
-import scala.Double.{PositiveInfinity => ∞}
 
 /**
   * Created by Dirk Toewe on 28.08.17.

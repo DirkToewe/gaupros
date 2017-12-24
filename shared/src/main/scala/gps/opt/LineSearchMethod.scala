@@ -1,5 +1,7 @@
 package gps.opt
 
+import gps.linalg.Vec
+
 import scala.Double.{PositiveInfinity => ∞}
 
 /** Super-trait for exact and inexact <a href="https://en.wikipedia.org/wiki/Line_search">line search</a> methods.

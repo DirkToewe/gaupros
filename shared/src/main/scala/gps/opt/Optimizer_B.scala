@@ -1,5 +1,7 @@
 package gps.opt
 
+import gps.linalg.Vec
+
 /** An optimizer allowing box constraints.
   *
   * Created by Dirk Toewe on 29.08.17.

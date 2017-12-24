@@ -1,5 +1,6 @@
 package gps
 
+import gps.linalg.Vec
 import scala.util.Random
 
 /** A collection of Design of Experiments utility methods.

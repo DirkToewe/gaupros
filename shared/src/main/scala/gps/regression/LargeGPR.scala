@@ -2,6 +2,7 @@ package gps.regression
 
 import gps.kernel.Kernel
 import gps.linalg
+import gps.linalg.Vec
 
 import scala.math.{exp, log, Pi => π}
 

@@ -1,5 +1,7 @@
 package gps.kernel
 
+import gps.linalg.Vec
+
 object Kernel_experiments
 {
   def main( args: Array[String] ) =

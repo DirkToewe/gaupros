@@ -1,5 +1,6 @@
 package gps.regression
 
+import gps.linalg.Vec
 import gps.util.PlotlyUtil
 
 import scala.math.{sqrt => √}

@@ -1,5 +1,6 @@
 package gps.opt
 
+import gps.linalg.Vec
 import gps.util.PlotlyUtil
 
 import scala.collection.mutable.ArrayBuffer

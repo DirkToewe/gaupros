@@ -2,7 +2,7 @@ package gps
 
 import java.lang.Math.{pow, sqrt}
 
-import gps.linalg.{Mat, MatRM}
+import gps.linalg.{Mat, MatRM, Vec}
 import utest._
 
 import scala.collection.immutable.{IndexedSeq => ISeq}

@@ -1,6 +1,6 @@
 package gps.opt.test_functions
 
-import gps.linalg.LMat
+import gps.linalg.{ LMat, Vec }
 import gps.opt.ObjectiveWithHessian
 
 /**

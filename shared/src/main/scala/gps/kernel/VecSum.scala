@@ -1,5 +1,7 @@
 package gps.kernel
 
+import gps.linalg.Vec
+
 /** A Kernel[Vec] that uses a nested Kernel[Double] to zip the entries of the vectors
   * arguments pairwise and sums them up afterwards.
   *

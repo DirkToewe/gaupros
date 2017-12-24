@@ -3,7 +3,7 @@ import org.scalajs.jsenv.nodejs.NodeJSEnv
 
 // enablePlugins(ScalaJSPlugin)
 
-name := "GauProS root project"
+name := "GauProS"
 scalaVersion in ThisBuild := "2.12.4"
 
 scalaJSStage in Global := FullOptStage
@@ -24,11 +24,11 @@ lazy val gaupros = crossProject //JSPlatform, JVMPlatform)
 
       testFrameworks += new TestFramework("utest.runner.Framework"),
 
-      libraryDependencies += "com.lihaoyi" %%% "utest" % "0.4.8" % "test"
+      libraryDependencies += "com.lihaoyi" %%% "utest" % "0.6.2" % "test"
   )
   .jsSettings(
       jsEnv := new NodeJSEnv( NodeJSEnv.Config().withArgs("--max_old_space_size=12288" :: Nil) ),
-//      scalaJSUseMainModuleInitializer := true
+      scalaJSUseMainModuleInitializer := true
   )
   .jvmSettings(
   )
