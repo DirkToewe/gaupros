@@ -1,9 +1,9 @@
 package gps.regression
 
-import gps.kernel.Kernel
-import gps.linalg.{ LMat, Vec }
-import gps.opt.BFGS_B_Optimizer
-import gps.regression.gpr.{LogP_LOO, LogP_Marginal}
+import gps.kernel.{Kernel, Sym}
+import gps.linalg.{LMat, Vec}
+import gps.opt.{BFGS_B_Optimizer, ObjectiveWithHessian}
+import gps.regression.gpr.{LikelihoodFunction, LogP_LOO, LogP_LOO_Shifted, LogP_Marginal, LogP_Marginal_Shifted}
 
 import scala.Double.{PositiveInfinity => ∞}
 import scala.collection.immutable.Map
@@ -16,6 +16,11 @@ import scala.math.{exp, log, Pi => π}
   *   <dd><a href="http://www.gaussianprocess.org/gpml/chapters/RW2.pdf">
   *     C. E. Rasmussen & C. K. I. Williams, Gaussian Processes for Machine Learning,
   *     Chapter 2, the MIT Press, 2006, ISBN 026218253X
+  *   </a>
+  *   <dt>[2]
+  *   <dd><a href="http://www.ressources-actuarielles.net/EXT/ISFA/1226.nsf/0/e7dc33e4da12c5a9c12576d8002e442b/$FILE/Jones01.pdf">
+  *     Donald R. Jones, A, A Taxonomy of Global Optimization Methods Based on Response Surfaces,
+  *     Kluwer Academic Publishers, 2001, Journal of Global Optimization 21: 345–383
   *   </a>
   * <dl>
   *
@@ -142,7 +147,7 @@ object GPR
     * @param x
     * @param y
     *
-    * @param kernel          The covariance function in dependence of its parameters (parameters => kernel).
+    * @param kernel     The covariance function in dependence of its parameters (parameters => kernel).
     *
     * @param param_min  The lower bound of the individual kernel (hyper)parameters. Parameter i may no be less than param_min[i].
     * @param param_max  The upper bound of the individual kenrel (hyper)parameters. Parameter i may no be greater than param_max[i].
@@ -153,19 +158,20 @@ object GPR
   def fit[@specialized X](
     x: Array[X],
     y: Vec,
-    yShift: Double,
+    y_shift: Double,
 
     kernel: Kernel[X],
 
+    likelihood_fn: (Array[X],Vec,Double,Kernel[X]) => LikelihoodFunction = logp_marginal(_: Array[X],_: Vec,_: Double,_: Kernel[X]),
+
     param_init: Map[Symbol,Double] = Map.empty.withDefault(_ => 1.0 ), // <- assume one to be a reasonable initial value
-    param_min : Map[Symbol,Double] = Map.empty.withDefault(_ => 1e-6), // <- assume all parameters to be positive
+    param_min : Map[Symbol,Double] = Map.empty.withDefault(_ => 1e-7), // <- assume all parameters to be positive
     param_max : Map[Symbol,Double] = Map.empty.withDefault(_ => ∞   )
-  ) = {
+  ): GPR[X] = {
     if( x.length != y.length )
       throw new IllegalArgumentException("x and y must have same length.")
 
-    val likelihood = logp_marginal(x,y, yShift, kernel)
-//    val likelihood = logp_loo(x,y, yShift, kernel)
+    val likelihood = likelihood_fn(x,y, y_shift, kernel)
 
     val p0   = Vec( likelihood.params.map(param_init): _* )
     val pMin = Vec( likelihood.params.map(param_min ): _* )
@@ -179,17 +185,69 @@ object GPR
     val xArr = x.clone
     val yArr = y.clone
     var i = yArr.length
-    while( i > 0 )
-    {
-      i -= 1
+    while( i >  0 ) {
+           i -= 1
+      yArr(i) -= y_shift
+    }
+    val K = LMat.tabulate(x.length){ (i,j) => cov(xArr{i},xArr{j}, i,j) }
+    K.choleskyDecomp()
+
+    new GPR(xArr,yArr, y_shift, cov, K, params)
+  }
+
+  def fit_shifted[@specialized X](
+    x: Array[X],
+    y: Vec,
+    y_shift: Symbol,
+
+    kernel: Kernel[X],
+
+    likelihood_fn: (Array[X],Vec,Symbol,Kernel[X]) => LikelihoodFunction,
+
+    param_init: Map[Symbol,Double] = Map.empty,
+    param_min : Map[Symbol,Double] = Map.empty,
+    param_max : Map[Symbol,Double] = Map.empty
+  ): GPR[X] = {
+    if( x.length != y.length )
+      throw new IllegalArgumentException("x and y must have same length.")
+
+    val likelihood = likelihood_fn(x,y, y_shift, kernel)
+
+    val parMin = (_: Symbol) match {
+      case `y_shift` => -(∞)
+      case   _       => 1e-7
+    }
+    val parMax = param_max.getOrElse(_: Symbol,∞)
+    val par0 = (sym: Symbol) => param_init.getOrElse(sym, {
+      val result = if( sym != y_shift ) 1.0 else y.sum / y.length
+      result max parMin(sym) min parMax(sym)
+    })
+
+    val pMin = Vec( likelihood.params.map{parMin}: _* )
+    val pMax = Vec( likelihood.params.map{parMax}: _* )
+    val p0   = Vec( likelihood.params.map{par0  }: _* )
+
+    val p = BFGS_B_Optimizer() maximize (likelihood, p0,pMin,pMax)
+    val params = (likelihood.params zip p).toMap
+
+    val cov = kernel subs (params.toSeq :_*)
+
+    val yShift = params(y_shift)
+    val xArr = x.clone
+    val yArr = y.clone
+    var    i = yArr.length
+    while( i >  0 ) {
+           i -= 1
       yArr(i) -= yShift
     }
     val K = LMat.tabulate(x.length){ (i,j) => cov(xArr{i},xArr{j}, i,j) }
     K.choleskyDecomp()
 
-    new GPR(x,y, yShift, cov, K, params)
+    new GPR(xArr,yArr, yShift, cov, K, params)
   }
 
-  def logp_marginal[@specialized X]( x: Array[X], y: Vec, yShift: Double, cov: Kernel[X] ) = new LogP_Marginal(x,y,yShift,cov)
-  def logp_loo     [@specialized X]( x: Array[X], y: Vec, yShift: Double, cov: Kernel[X] ) = new LogP_LOO     (x,y,yShift,cov)
+  def logp_marginal[@specialized X]( x: Array[X], y: Vec, yShift: Double, cov: Kernel[X] ): LikelihoodFunction with ObjectiveWithHessian = new LogP_Marginal        (x,y,yShift,cov)
+  def logp_marginal[@specialized X]( x: Array[X], y: Vec, yShift: Symbol, cov: Kernel[X] ): LikelihoodFunction                           = new LogP_Marginal_Shifted(x,y,yShift,cov)
+  def logp_loo     [@specialized X]( x: Array[X], y: Vec, yShift: Double, cov: Kernel[X] ): LikelihoodFunction with ObjectiveWithHessian = new LogP_LOO             (x,y,yShift,cov)
+  def logp_loo     [@specialized X]( x: Array[X], y: Vec, yShift: Symbol, cov: Kernel[X] ): LikelihoodFunction                           = new LogP_LOO_Shifted     (x,y,yShift,cov)
 }

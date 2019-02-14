@@ -10,7 +10,9 @@ import scala.math.{sqrt => √}
   */
 package object gpr
 {
-  def plot1d( gpr: GPR[Double], x: Vec, y: Vec, marginAbs: Double=0.0, marginRel: Double=0.01 ) =
+  private[gpr] implicit val SYMBOL_ORDER: Ordering[Symbol] = Ordering by (_.name)
+
+  def plot1d( gpr: GPR[Double], x: Vec, y: Vec, marginAbs: Double=0.0, marginRel: Double=0.1 ) =
   {
     assert{ x.length == y.length }
 

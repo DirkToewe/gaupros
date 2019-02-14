@@ -2,16 +2,19 @@ package gps.regression.gpr
 
 import gps.kernel.Kernel
 import gps.linalg._
+import gps.opt.ObjectiveWithHessian
 
 import scala.collection.{IndexedSeq => ISeq}
 import scala.math.{log, Pi => π}
 
-/**
+/** Marginal log-likelihood function.
+  *
   * Created by Dirk Toewe on 10.08.17.
   */
-class LogP_Marginal[X]( x: Array[X], y: Vec, yShift: Double, kernel: Kernel[X] ) extends LikelihoodFunction[X](x,y,yShift,kernel)
+class LogP_Marginal[X]( x: Array[X], y: Vec, yShift: Double, kernel: Kernel[X] ) extends LikelihoodFunctionAbstract[X](x,y,kernel,kernel.params)
+                                                                                 with    ObjectiveWithHessian
 {
-  private def fval( K: LMat, β: Vec ) =
+  private def fval( K: LMat, β: Vec ): Double =
   {
     var logp = -0.5 * { (β ⋅ β) + nSamples*log(2*π) }
     K.diagForeach( logp -= log(_) )
@@ -19,14 +22,14 @@ class LogP_Marginal[X]( x: Array[X], y: Vec, yShift: Double, kernel: Kernel[X] )
   }
 
 
-  private def grad( K: LMat, β: Vec, nParams: Int, kGrad: Int => Kernel[X] ): Vec =
+  private def grad( K: LMat, β: Vec, kGrad: Int => Kernel[X] ): Vec =
   {
     val dK = K.copy
     dK.triSolveSumDerive( β, β map (-_) )
     dK.diagModify{ (dKij,i) => dKij - 1 / K(i,i) }
     K.choleskySumDerive(dK)
 
-    Vec.tabulate(nParams)(
+    Vec.tabulate(params.length)(
       kGrad andThen {
         dkdp => dK.mapReduce{ (w,i,j) => w * dkdp(x{i},x{j}, i,j) }(_ + _)
       }
@@ -34,9 +37,9 @@ class LogP_Marginal[X]( x: Array[X], y: Vec, yShift: Double, kernel: Kernel[X] )
   }
 
 
-  private def hess( K: LMat, α: Vec, nParams: Int, kGrad: Int => Kernel[X], kHess: (Int,Int) => Kernel[X] ) =
+  private def hess( K: LMat, α: Vec, kGrad: Int => Kernel[X], kHess: (Int,Int) => Kernel[X] ): LMat =
   {
-    LMatCM.tabulateCM(nParams){
+    LMatCM.tabulateCM(params.length){
       dq =>
         val dKdq = {
           val dkdq = kGrad(dq)
@@ -67,7 +70,7 @@ class LogP_Marginal[X]( x: Array[X], y: Vec, yShift: Double, kernel: Kernel[X] )
   }
 
 
-  override def apply( param: Vec ) =
+  override def apply( param: Vec ): Double =
   {
     val k = cov(param)
     val β = y - yShift
@@ -89,11 +92,11 @@ class LogP_Marginal[X]( x: Array[X], y: Vec, yShift: Double, kernel: Kernel[X] )
     K.choleskyDecomp()
     K.triSolve(β)
 
-    grad(K,β,param.length,kGrad)
+    grad(K,β,kGrad)
   }
 
 
-  override def fval_grad( param: Vec ) =
+  override def fval_grad( param: Vec ): (Double,Vec) =
   {
     val (k,kGrad) = cov_grad(param)
     val β = y - yShift
@@ -104,7 +107,7 @@ class LogP_Marginal[X]( x: Array[X], y: Vec, yShift: Double, kernel: Kernel[X] )
 
     (
       fval(K,β),
-      grad(K,β,param.length,kGrad)
+      grad(K,β,kGrad)
     )
   }
 
@@ -123,7 +126,7 @@ class LogP_Marginal[X]( x: Array[X], y: Vec, yShift: Double, kernel: Kernel[X] )
     K.choleskyDecomp()
     K.choleskySolve(α)
 
-    hess(K,α,param.length,kGrad,kHess)
+    hess(K,α,kGrad,kHess)
   }
 
 
@@ -140,8 +143,8 @@ class LogP_Marginal[X]( x: Array[X], y: Vec, yShift: Double, kernel: Kernel[X] )
 
     (
       fval(K,β),
-      grad(K,β,param.length,kGrad),
-      hess(K,α,param.length,kGrad,kHess)
+      grad(K,β,kGrad),
+      hess(K,α,kGrad,kHess)
     )
   }
 

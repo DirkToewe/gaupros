@@ -3,7 +3,7 @@ package gps.regression
 import gps.doe.lhs
 import gps.kernel._
 import gps.linalg._
-import gps.regression.gpr.LikelihoodFunction
+import gps.opt.ObjectiveWithHessian
 import utest._
 
 import scala.util.Random
@@ -12,7 +12,7 @@ object GPR_logp_fval_test extends TestSuite
 {
   private def testLikelihoodFVal(
     name: String,
-    likelihood: (Array[Vec],Vec,Double,Kernel[Vec]) => LikelihoodFunction[Vec]
+    likelihood: (Array[Vec],Vec,Double,Kernel[Vec]) => ObjectiveWithHessian
   ) = {
     for( run <- (0 to 32)/*.par*/ )
     {
@@ -27,8 +27,8 @@ object GPR_logp_fval_test extends TestSuite
       x.foreach(_ *= 4)
       x.foreach(_ -= 2)
 
-      assert(          x.length == nSamples )
-      assert( x.forall(_.length == nFeatures) )
+      assert(           x.length == nSamples   )
+      assert{ x forall (_.length == nFeatures) }
 
       val y = Vec.tabulate(nSamples)( _ => rng.nextDouble )
 
@@ -61,7 +61,7 @@ object GPR_logp_fval_test extends TestSuite
   }
 
   override def tests = this {
-    TestableSymbol('logpLOOFVal     ) { testLikelihoodFVal("LOO",      GPR.logp_loo     ) }
-    TestableSymbol('logpMarginalFVal) { testLikelihoodFVal("Marginal", GPR.logp_marginal) }
+    TestableSymbol('logpLOOFVal     ) { testLikelihoodFVal("LOO",      GPR.logp_loo     (_,_,_,_)) }
+    TestableSymbol('logpMarginalFVal) { testLikelihoodFVal("Marginal", GPR.logp_marginal(_,_,_,_)) }
   }
 }

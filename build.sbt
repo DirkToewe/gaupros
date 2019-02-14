@@ -1,38 +1,43 @@
 import org.scalajs.jsenv.nodejs.NodeJSEnv
-// import sbtcrossproject.{CrossType, crossProject}
+import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 
-// enablePlugins(ScalaJSPlugin)
+name := "gauprosRoot"
 
-name := "GauProS"
-scalaVersion in ThisBuild := "2.12.4"
+// TO TEST RUN
+//   - gauprosJVM/test
+//   - gauprosJS/testint
 
-scalaJSStage in Global := FullOptStage
-// scalaJSStage in Global := FastOptStage
-scalacOptions in Global ++= Seq("-feature", "-deprecation")
+//lazy val gauprosBuild = project.in( file(".") )
+//  .aggregate(gauprosJS, gauprosJVM)
+//  .settings()
 
-lazy val root = project.in( file(".") )
-  .aggregate(gauprosJS, gauprosJVM)
-  .settings()
 
-lazy val gaupros = crossProject //JSPlatform, JVMPlatform)
+lazy val gaupros = crossProject(JSPlatform, JVMPlatform)
+  .crossType(CrossType.Full)
   .in( file(".") )
-//  .crossType(CrossType.Pure)
   .settings(
-      name := "GauProS",
-      version := "0.2",
-      scalaVersion := "2.12.4",
+     name := "gaupros",
+     version := "0.2.0",
+     scalaVersion := "2.12.8",
+     scalacOptions ++= Seq(
+      "-feature",
+      "-deprecation"
+     ),
 
-      testFrameworks += new TestFramework("utest.runner.Framework"),
+     testFrameworks += new TestFramework("utest.runner.Framework"),
 
-      libraryDependencies += "com.lihaoyi" %%% "utest" % "0.6.2" % "test"
-  )
+     libraryDependencies ++= Seq(
+       "com.lihaoyi" %%% "utest" % "0.6.6" % "test"
+     )
+   )
   .jsSettings(
-      jsEnv := new NodeJSEnv( NodeJSEnv.Config().withArgs("--max_old_space_size=12288" :: Nil) ),
-      scalaJSUseMainModuleInitializer := true
-  )
+     jsEnv := new NodeJSEnv( NodeJSEnv.Config().withArgs("--max_old_space_size=3584" :: Nil) ),
+     scalaJSUseMainModuleInitializer := true,
+     scalaJSStage := FullOptStage
+   )
   .jvmSettings(
-  )
-  .in( file(".") )
+   )
+
 
 lazy val gauprosJS = gaupros.js
 lazy val gauprosJVM= gaupros.jvm

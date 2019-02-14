@@ -4,12 +4,13 @@ import gps.diff.gradient
 import gps.doe.lhs
 import gps.kernel._
 import gps.linalg._
+import gps.opt.ObjectiveWithHessian
 import gps.regression.gpr.LikelihoodFunction
 import utest._
 
 import scala.util.Random
 
-class GPR_logp_grad_test( name: String, likelihood: (Array[Vec],Vec,Double,Kernel[Vec]) => LikelihoodFunction[Vec] ) extends TestSuite
+class GPR_logp_grad_test( name: String, likelihood: (Array[Vec],Vec,Double,Kernel[Vec]) => LikelihoodFunction ) extends TestSuite
 {
   override def tests = this{
     TestableSymbol('testRandomly) {
@@ -56,7 +57,11 @@ class GPR_logp_grad_test( name: String, likelihood: (Array[Vec],Vec,Double,Kerne
 
         test(logp.gradient)
         test(logp.fval_grad(_)._2)
-        test(logp.fval_grad_hess(_)._2)
+        logp match {
+          case logp: ObjectiveWithHessian =>
+            test(logp.fval_grad_hess(_)._2)
+          case _ =>
+        }
 
         assert( nFailures <= 3 )
 
@@ -65,5 +70,5 @@ class GPR_logp_grad_test( name: String, likelihood: (Array[Vec],Vec,Double,Kerne
     }
   }
 }
-object GPR_logp_grad_marginal_test extends GPR_logp_grad_test("Marginal", GPR.logp_marginal)
-object GPR_logp_grad_loo_test      extends GPR_logp_grad_test("LOO",      GPR.logp_loo     )
+object GPR_logp_grad_marginal_test extends GPR_logp_grad_test("Marginal", GPR.logp_marginal(_,_,_,_) )
+object GPR_logp_grad_loo_test      extends GPR_logp_grad_test("LOO",      GPR.logp_loo     (_,_,_,_) )

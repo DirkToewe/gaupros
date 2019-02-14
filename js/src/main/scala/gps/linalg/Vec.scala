@@ -28,6 +28,22 @@ class Vec private[linalg]( val vals: Float64Array ) extends AnyVal
   def isDefinedAt( idx: Int ): Boolean
     = 0 <= idx && idx < length
 
+  @inline def foreach[U]( method: Double => U ) = {
+    var    i = vals.length
+    while( i >  0 ) {
+      i -= 1
+      method( vals(i) )
+    }
+  }
+
+  @inline def foreach[U]( method: (Double,Int) => U ) = {
+    var    i = vals.length
+    while( i >  0 ) {
+      i -= 1
+      method( vals(i), i )
+    }
+  }
+
   def forall( predicate: Double => Boolean ): Boolean = vals.every(predicate)
 
   def clone = new Vec( new Float64Array(vals) )
@@ -35,9 +51,8 @@ class Vec private[linalg]( val vals: Float64Array ) extends AnyVal
   def iterator = new Iterator[Double]{
     private var i=0
     def hasNext = i < length
-    def next = {
-      if( ! hasNext )
-        throw new NoSuchElementException
+    def    next = {
+      if( ! hasNext ) throw new NoSuchElementException
       val result = vals(i); i += 1
       result
     }
@@ -125,6 +140,8 @@ class Vec private[linalg]( val vals: Float64Array ) extends AnyVal
 
   @inline def min = vals.reduce[Double]( math.min(_,_) )
   @inline def max = vals.reduce[Double]( math.max(_,_) )
+
+  override def toString: String = mkString("[",", ","]")
 
   def mkString( infix: CharSequence ): String
     = mkString("",infix,"")

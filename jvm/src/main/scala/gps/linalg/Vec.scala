@@ -21,7 +21,23 @@ class Vec private[linalg]( val vals: Array[Double] ) extends AnyVal
   def isDefinedAt( idx: Int ): Boolean
     = 0 <= idx && idx < length
 
-  def forall( predicate: Double => Boolean ) = {
+  @inline def foreach[U]( method: Double => U ) = {
+    var    i = vals.length
+    while( i >  0 ) {
+           i -= 1
+      method( vals(i) )
+    }
+  }
+
+  @inline def foreach[U]( method: (Double,Int) => U ) = {
+    var    i = vals.length
+    while( i >  0 ) {
+      i -= 1
+      method( vals(i), i )
+    }
+  }
+
+  @inline def forall( predicate: Double => Boolean ) = {
     @tailrec def loop( i: Int ): Boolean
       = i < 0 || predicate{this(i)} && loop(i-1)
     loop(length-1)
@@ -32,9 +48,8 @@ class Vec private[linalg]( val vals: Array[Double] ) extends AnyVal
   def iterator = new Iterator[Double]{
     private var i=0
     def hasNext = i < length
-    def next = {
-      if( ! hasNext )
-        throw new NoSuchElementException
+    def    next = {
+      if( ! hasNext ) throw new NoSuchElementException
       val result = apply(i); i += 1
       result
     }
@@ -43,9 +58,9 @@ class Vec private[linalg]( val vals: Array[Double] ) extends AnyVal
   def seq: IndexedSeq[Double] = vals
 
   def slice( from: Int, until: Int=length ) = {
-    val len = length-from
+    val len = until-from
     val result = new Array[Double](len)
-    System.arraycopy(vals,from, result,0, length)
+    System.arraycopy(vals,from, result,0, len)
     new Vec(result)
   }
 
@@ -195,6 +210,8 @@ class Vec private[linalg]( val vals: Array[Double] ) extends AnyVal
     }
     result
   }
+
+  override def toString: String = mkString("[",", ","]")
 
   def mkString( infix: CharSequence ): String
     = mkString("",infix,"")

@@ -17,7 +17,7 @@ object Seqs
       = if( from > to )
           -(from+1)
         else {
-          val mid = (from + to) /2
+          val mid = (from + to) / 2
           val c = order.compare(seq(mid),key)
                if( c < 0 ) binSearch(     mid+1,to)
           else if( c > 0 ) binSearch(from,mid-1   )

@@ -23,15 +23,32 @@ object GPR_experiments
     val rng = new Random(1337)
     val nSamples = 1000
     val x = Array.tabulate(nSamples)( -6 + 12.0 * _ / (nSamples-1) )
-    val y = Vec( x map { sin(_) - 0.1 + 0.2 * rng.nextDouble }: _* )
+    val y = Vec( x map { sin(_) - 15.1 + 0.2 * rng.nextDouble }: _* )
     val yShift = y.sum / y.length
+
+    println("X_train_data = [")
+    var    i=0
+    while( i < nSamples ) {
+      print("  ")
+      println( x.slice(i,i+20).mkString("",", ",",") )
+      i += 20
+    }
+    println("]\ny_train_data = [")
+           i=0
+    while( i < nSamples ) {
+      print("  ")
+      println( y.slice(i,i+20).mkString("",", ",",") )
+      i += 20
+    }
+    println("]")
 
     val cov = Noise('var_noise) + 'var_func * Exp( - AbsDelta.pow(1.9) * 'theta )
 
-    val gpr = GPR.fit(x,y, yShift, cov)
+//    val gpr = GPR.fit_shifted(x,y, 'yShift, cov, GPR.logp_marginal[Double])
+    val gpr = GPR.fit_shifted(x,y, 'yShift, cov, GPR.logp_loo[Double])
     println(gpr.params)
 
-//    gps.regression.gpr.plot1d(gpr,Vec(x: _*),y)
+    gps.regression.gpr.plot1d(gpr,Vec(x: _*),y)
   }
 
   def plotTraining() =
