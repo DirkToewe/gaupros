@@ -28,12 +28,12 @@ case class LineSearchStrongWolfe( objective: ObjectiveWithGradient, c1: Double=0
                       α_init: Double = 1, α_max: Double = ∞ ): (Vec,Double,Vec) =
   {
     val dφ_0 = g_0⋅dir
-    assert( dφ_0 < -0.0 )
+    assert( dφ_0 < -0.0, s"dφ_0 = ${dφ_0} >= -0.0" )
 
     @tailrec def zoom( α_a: Double, φ_a: Double, α_b: Double, φ_b: Double ): (Vec,Double,Vec) =
     {
-      assert( α_a >= +0.0 )
-      assert( α_b >= +0.0 )
+      assert( α_a >= +0.0, s"α_a = ${α_a} < 0" )
+      assert( α_b >= +0.0, s"α_b = ${α_b} < 0" )
       val α = (α_a + α_b)/2
       val X = x_0 + α*dir
       val (φ,g) = objective.fval_grad(X)

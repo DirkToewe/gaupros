@@ -213,12 +213,9 @@ object GPR
 
     val likelihood = likelihood_fn(x,y, y_shift, kernel)
 
-    val parMin = (_: Symbol) match {
-      case `y_shift` => -(∞)
-      case   _       => 1e-7
-    }
-    val parMax = param_max.getOrElse(_: Symbol,∞)
-    val par0 = (sym: Symbol) => param_init.getOrElse(sym, {
+    val parMin = (sym: Symbol) => param_min .getOrElse( sym, if(sym==y_shift) -(∞) else 1e-7 )
+    val parMax =                  param_max .getOrElse(_: Symbol,∞)
+    val par0   = (sym: Symbol) => param_init.getOrElse(sym, {
       val result = if( sym != y_shift ) 1.0 else y.sum / y.length
       result max parMin(sym) min parMax(sym)
     })

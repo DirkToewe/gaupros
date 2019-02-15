@@ -48,7 +48,7 @@ object GPR_experiments
     val gpr = GPR.fit_shifted(x,y, 'yShift, cov, GPR.logp_loo[Double])
     println(gpr.params)
 
-    gps.regression.gpr.plot1d(gpr,Vec(x: _*),y)
+//    gps.regression.gpr.plot1d(gpr,Vec(x: _*),y)
   }
 
   def plotTraining() =
