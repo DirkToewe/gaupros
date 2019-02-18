@@ -33,7 +33,7 @@ lazy val gaupros = crossProject(JSPlatform, JVMPlatform)
   .in( file(".") )
   .settings(
      name := "gaupros",
-     version := "0.2.0",
+     version := "0.3.0",
      scalaVersion := "2.12.8",
      scalacOptions ++= Seq(
       "-feature",

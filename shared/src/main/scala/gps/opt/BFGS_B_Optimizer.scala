@@ -79,7 +79,7 @@ case class BFGS_B_Optimizer(
       // update inverse of Hessian approximation
       val dx = _x - x // <- often referred to as 's'
       val dg = _g - g // <- often referred to as 'y'
-      var dxdg = dx⋅dg; assert( dxdg > +0.0, s"dxdg = ${dxdg} <= +0.0" )
+      var dxdg = dx⋅dg; assert( dxdg > +0.0, "Optimizer failure." )
       val Hdg = H symMatMul dg
 
       dx /= dxdg; dxdg += dg⋅Hdg
