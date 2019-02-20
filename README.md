@@ -40,7 +40,7 @@ of a BFGS optimizer. Said optimizer does not yet support starting from the box b
 The initial hyperparameter values have to be well inside and not on the boundary of
 the box.
 
-```
+```scala
 // http://www.gaussianprocess.org/gpml/chapters/RW2.pdf#page=13
 val kernel = Noise('σ_n * 'σ_n)  +  'σ_f * 'σ_f * Exp( - AbsDelta.pow(2.0) / (2 * 'l * 'l) )
 
